@@ -1,0 +1,26 @@
+{
+  "name": "api-sis",
+  "main": "src/index.js",
+  "compatibility_date": "2024-11-14",
+  "containers": [
+    {
+      "name": "api-sis-container",
+      "image": "./Dockerfile",
+      "class_name": "ApiSIS" 
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "MY_API_CONTAINER",
+        "class_name": "ApiSIS"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["ApiSIS"]
+    }
+  ]
+}
