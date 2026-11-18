@@ -3,44 +3,50 @@ using ApiSIS.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. TAMBAHKAN INI - Konfigurasi CORS
+// CORS
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowFrontend",
-        policy =>
-        {
-            // Izinkan semua origin untuk development
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
-
-            // Atau spesifik ke frontend Anda
-            // policy.WithOrigins("http://localhost:9000", "http://localhost:8080")
-            //       .AllowAnyMethod()
-            //       .AllowAnyHeader();
-        });
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
 });
 
+// Controllers
 builder.Services.AddControllers();
 
+// Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
 
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+// Swagger - aktifkan untuk testing
+app.UseSwagger();
+
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint(
+        "./v1/swagger.json",
+        "API SIS V1"
+    );
+    options.RoutePrefix = "swagger";
+});
 
-app.UseHttpsRedirection();
+// CATATAN: UseHttpsRedirection() dimatikan (di-comment) karena di Docker/InstaBox 
+// HTTPS sudah ditangani oleh reverse proxy InstaBox. 
+// Jika dinyalakan, akan muncul warning "Failed to determine the https port for redirect".
+// app.UseHttpsRedirection();
 
-// 2. TAMBAHKAN INI - Gunakan CORS (SEBELUM UseAuthorization)
 app.UseCors("AllowFrontend");
 
 app.UseAuthorization();
